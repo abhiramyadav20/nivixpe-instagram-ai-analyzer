@@ -1,0 +1,232 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --color-surface-950: #050811;
+  --color-surface-900: #080b11;
+  --color-surface-850: #0a0f1a;
+  --color-surface-800: #0d1320;
+  --color-surface-750: #111827;
+  --color-surface-700: #162035;
+  --color-surface-600: #1e293b;
+  --color-surface-500: #2d3f5c;
+
+  --nivixpe-teal: #1de9b6;
+  --nivixpe-teal-dim: #0fb98f;
+  --nivixpe-teal-glow: rgba(29, 233, 182, 0.3);
+  --nivixpe-navy: #0e2240;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body {
+  background-color: var(--color-surface-950);
+  color: #f0f4f8;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-surface-900); }
+::-webkit-scrollbar-thumb { background: rgba(29, 233, 182, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(29, 233, 182, 0.4); }
+
+/* ─── Card hover glow ─────────────────────────────────────────────────────── */
+.card-hover {
+  transition: box-shadow 0.3s var(--ease-out-expo), transform 0.3s var(--ease-out-expo), border-color 0.3s ease;
+}
+.card-hover:hover {
+  box-shadow: 0 0 0 1px rgba(29, 233, 182, 0.2), 0 12px 40px rgba(29, 233, 182, 0.06);
+  transform: translateY(-3px);
+}
+
+/* ─── Glass morphism ──────────────────────────────────────────────────────── */
+.glass {
+  background: rgba(13, 19, 32, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-strong {
+  background: rgba(8, 11, 17, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes teal-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(29, 233, 182, 0.4); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(29, 233, 182, 0); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Animation utilities ─────────────────────────────────────────────────── */
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s var(--ease-out-expo) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s var(--ease-out-expo) forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-teal-pulse {
+  animation: teal-pulse 2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s var(--ease-out-expo) forwards;
+}
+
+/* ─── Stagger delays ──────────────────────────────────────────────────────── */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+
+/* ─── Skeleton loading ────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-800) 25%,
+    var(--color-surface-700) 50%,
+    var(--color-surface-800) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+/* ─── Gradient text ───────────────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #1de9b6 0%, #0fb98f 50%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Glow effects ────────────────────────────────────────────────────────── */
+.glow-teal {
+  box-shadow: 0 0 20px rgba(29, 233, 182, 0.15);
+}
+
+.glow-teal-strong {
+  box-shadow: 0 0 30px rgba(29, 233, 182, 0.2), 0 0 60px rgba(29, 233, 182, 0.05);
+}
+
+/* ─── Tab content transitions ─────────────────────────────────────────────── */
+.tab-content-enter {
+  animation: fade-in-up 0.35s var(--ease-out-expo) forwards;
+}
+
+/* ─── Button press effect ─────────────────────────────────────────────────── */
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* ─── Number counter animation ────────────────────────────────────────────── */
+.count-up {
+  animation: count-up 0.5s var(--ease-out-expo) forwards;
+}
+
+/* ─── Smooth image loading ─────────────────────────────────────────────────── */
+.img-fade-in {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.img-fade-in.loaded {
+  opacity: 1;
+}
+
+/* ─── Focus ring ───────────────────────────────────────────────────────────── */
+.focus-ring:focus-visible {
+  outline: none;
+  ring: 2px;
+  ring-color: rgba(29, 233, 182, 0.5);
+  ring-offset: 2px;
+  ring-offset-color: var(--color-surface-950);
+}
+
+/* ─── Selection color ─────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(29, 233, 182, 0.2);
+  color: #fff;
+}
+
+/* ─── Tooltip arrow ───────────────────────────────────────────────────────── */
+.tooltip-arrow::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: inherit;
+}

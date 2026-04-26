@@ -31,7 +31,7 @@
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/abhiramyadav20/instagram-ai-analyzer.git
+git clone https://github.com/abhiramyadav20/instagram-ai-analyzerr.git
 cd content-dashboard
 ```
 

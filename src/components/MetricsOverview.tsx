@@ -44,30 +44,31 @@ export default function MetricsOverview({ reels, contentType }: { reels: Reel[];
     return () => observer.disconnect()
   }, [])
 
-  if (!reels || reels.length === 0) return null
+  const validReels = (reels || []).filter(r => r && typeof r === 'object')
+  if (validReels.length === 0) return null
 
   const isVideo = contentType === 'video'
   const isPost = contentType === 'post'
   const isAll = contentType === 'all'
   const primaryMetric = isPost ? 'likes' : 'views'
 
-  const totalViews = reels.reduce((s, r) => s + r.views, 0)
-  const totalLikes = reels.reduce((s, r) => s + r.likes, 0)
+  const totalViews = validReels.reduce((s, r) => s + (Number(r.views) || 0), 0)
+  const totalLikes = validReels.reduce((s, r) => s + (Number(r.likes) || 0), 0)
 
-  const avgViews = totalViews / reels.length
-  const avgLikes = totalLikes / reels.length
+  const avgViews = totalViews / validReels.length
+  const avgLikes = totalLikes / validReels.length
   const avgEngVideo = isVideo
-    ? (reels || []).reduce((s, r) => s + (r && r.views > 0 ? (r.likes + r.comments) / r.views : 0), 0) / reels.length * 100
+    ? validReels.reduce((s, r) => s + (r.views > 0 ? (Number(r.likes) + Number(r.comments)) / r.views : 0), 0) / validReels.length * 100
     : 0
 
   const postEngagement = (isPost || isAll)
-    ? reels.reduce((s, r) => s + r.likes + r.comments, 0) / reels.length
+    ? validReels.reduce((s, r) => s + (Number(r.likes) + Number(r.comments)), 0) / validReels.length
     : 0
 
-  const topReel = reels.reduce((a, b) => (b[primaryMetric] > a[primaryMetric] ? b : a), reels[0])
-  const lowReel = reels.reduce((a, b) => (b[primaryMetric] < a[primaryMetric] ? b : a), reels[0])
-  const topCount = reels.filter((r) => r.performance === 'top').length
-  const lowCount = reels.filter((r) => r.performance === 'low').length
+  const topReel = validReels.reduce((a, b) => (Number(b[primaryMetric]) || 0) > (Number(a[primaryMetric]) || 0) ? b : a, validReels[0])
+  const lowReel = validReels.reduce((a, b) => (Number(b[primaryMetric]) || 0) < (Number(a[primaryMetric]) || 0) ? b : a, validReels[0])
+  const topCount = validReels.filter((r) => r && r.performance === 'top').length
+  const lowCount = validReels.filter((r) => r && r.performance === 'low').length
 
   const stats = [
     {

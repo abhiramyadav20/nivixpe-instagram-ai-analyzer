@@ -85,12 +85,13 @@ export default function ComparisonView({ myReels, competitors, myUsername = 'niv
 
   // ─── Metrics ────────────────────────────────────────────────────────────────
   const metrics = allAccounts.map((a, i) => {
-    const avg = a.reels.reduce((s, r) => s + (Number(r[primaryMetric]) || 0), 0) / a.reels.length
+    const valid = a.reels.filter(r => r && typeof r === 'object')
+    const avg = valid.reduce((s, r) => s + (Number(r[primaryMetric]) || 0), 0) / (valid.length || 1)
     const avgEng = isVideo
-      ? a.reels.reduce((s, r) => s + (r.views > 0 ? (Number(r.likes) + Number(r.comments)) / r.views : 0), 0) / a.reels.length * 100
-      : a.reels.reduce((s, r) => s + (Number(r.likes) + Number(r.comments)), 0) / a.reels.length
-    const topContent = a.reels.reduce((best, r) => (Number(r[primaryMetric]) || 0) > (Number(best[primaryMetric]) || 0) ? r : best, a.reels[0])
-    return { ...a, avgMetric: avg, avgEng, topContent, color: ACCOUNT_COLORS[i], bg: ACCOUNT_BG[i] }
+      ? valid.reduce((s, r) => s + (r.views > 0 ? (Number(r.likes) + Number(r.comments)) / r.views : 0), 0) / (valid.length || 1) * 100
+      : valid.reduce((s, r) => s + (Number(r.likes) + Number(r.comments)), 0) / (valid.length || 1)
+    const topContent = valid.reduce((best, r) => (Number(r[primaryMetric]) || 0) > (Number(best[primaryMetric]) || 0) ? r : best, valid[0] || a.reels[0])
+    return { ...a, reels: valid, avgMetric: avg, avgEng, topContent, color: ACCOUNT_COLORS[i], bg: ACCOUNT_BG[i] }
   })
 
   const meMetrics = metrics[0]

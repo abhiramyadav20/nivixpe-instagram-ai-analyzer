@@ -162,8 +162,4 @@ const MY_URL = 'https://www.instagram.com/yourusername/'
 
 ---
 
-## License
 
-MIT — use it, fork it, build on it.
-
-Built with ❤️ for Instagram Creators

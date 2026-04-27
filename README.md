@@ -30,7 +30,7 @@
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/abhiramyadav20/instagram-ai-analyzerr.git
+git clone https://github.com/abhiramyadav20/nivixpe-instagram-ai-analyzer.git
 cd content-dashboard
 ```
 

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'NIVIXPE — AI Content Dashboard',
+  title: 'NIVIXPE — Instagram AI Analyzer',
   description: 'Instagram analytics, competitor research & AI-powered content strategy. Scrape reels, analyze performance, and generate content ideas with GPT-4o.',
   keywords: ['Instagram analytics', 'content strategy', 'AI content ideas', 'reel analytics', 'competitor analysis'],
   authors: [{ name: 'Nivixpe' }],

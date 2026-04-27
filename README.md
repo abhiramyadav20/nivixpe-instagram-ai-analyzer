@@ -1,4 +1,4 @@
-# Content Dashboard
+# NIVIXPE — Instagram AI Analyzer
 
 ![Dashboard Preview](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js) ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 

@@ -43,7 +43,7 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Toolti
 }
 
 export default function PerformanceChart({ reels, contentType }: { reels: Reel[]; contentType: 'video' | 'post' | 'all' }) {
-  if (reels.length === 0) return null
+  if (!reels || reels.length === 0) return null
 
   const isPost = contentType === 'post'
   const primaryMetric = isPost ? 'likes' : 'views'

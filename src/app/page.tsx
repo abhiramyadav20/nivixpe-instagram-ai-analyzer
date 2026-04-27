@@ -277,7 +277,7 @@ export default function Dashboard() {
     }
   }, [myLastSynced])
 
-  const myFilteredTypeReels = myReels.filter(r => contentType === 'all' ? true : contentType === 'video' ? r.type === 'Video' : r.type !== 'Video')
+  const myFilteredTypeReels = (Array.isArray(myReels) ? myReels : []).filter(r => contentType === 'all' ? true : contentType === 'video' ? r.type === 'Video' : r.type !== 'Video')
   const filteredReels = perfFilter === 'all' ? myFilteredTypeReels : myFilteredTypeReels.filter((r) => r.performance === perfFilter)
 
   const competitorsFilteredType: Record<string, Reel[]> = {}
@@ -736,11 +736,11 @@ export default function Dashboard() {
 
 
             {/* Warnings */}
-            {(myReels.length === 0 || competitorUsernames.length === 0) && (
+            {((myReels || []).length === 0 || competitorUsernames.length === 0) && (
               <div className="flex items-start gap-3 bg-amber-500/8 border border-amber-500/20 text-amber-300 rounded-xl p-4 mb-6 text-sm animate-fade-in-up">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>
-                  {myReels.length === 0 && 'Fetch your reels first (My Reels tab). '}
+                  {(myReels || []).length === 0 && 'Fetch your reels first (My Reels tab). '}
                   {competitorUsernames.length === 0 && 'Add competitors (Competitors tab) for better ideas.'}
                 </span>
               </div>

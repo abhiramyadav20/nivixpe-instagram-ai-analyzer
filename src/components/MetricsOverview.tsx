@@ -44,7 +44,7 @@ export default function MetricsOverview({ reels, contentType }: { reels: Reel[];
     return () => observer.disconnect()
   }, [])
 
-  if (reels.length === 0) return null
+  if (!reels || reels.length === 0) return null
 
   const isVideo = contentType === 'video'
   const isPost = contentType === 'post'
@@ -57,7 +57,7 @@ export default function MetricsOverview({ reels, contentType }: { reels: Reel[];
   const avgViews = totalViews / reels.length
   const avgLikes = totalLikes / reels.length
   const avgEngVideo = isVideo
-    ? reels.reduce((s, r) => s + (r.views > 0 ? (r.likes + r.comments) / r.views : 0), 0) / reels.length * 100
+    ? (reels || []).reduce((s, r) => s + (r && r.views > 0 ? (r.likes + r.comments) / r.views : 0), 0) / reels.length * 100
     : 0
 
   const postEngagement = (isPost || isAll)
@@ -100,9 +100,9 @@ export default function MetricsOverview({ reels, contentType }: { reels: Reel[];
     {
       icon: <TrendingUp className="w-5 h-5" style={{ color: '#1de9b6' }} />,
       label: isAll ? 'Best Content' : isVideo ? 'Best Reel' : 'Best Post',
-      value: topReel[primaryMetric],
-      rawValue: topReel[primaryMetric],
-      sub: new Date(topReel.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+      value: topReel ? topReel[primaryMetric] : 0,
+      rawValue: topReel ? topReel[primaryMetric] : 0,
+      sub: topReel ? new Date(topReel.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'No data',
       gradient: 'from-teal-500/10',
       border: 'border-[#1de9b6]/20',
       highlight: true,

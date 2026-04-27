@@ -9,7 +9,7 @@
 - **My Reels** — Scrapes your last 30 days of reels via Apify, shows views, likes, comments, engagement rate, and flags top performers vs underperforming reels with a bar chart
 - **Competitors** — Add any Instagram username, scrape their reels, see what's working for them
 - **Compare** — Side-by-side analysis of your account vs competitors: avg views, engagement rate, content theme radar chart, your strengths and content gaps
-- **Content Ideas** — Gemini 1.5 Pro reads your data + competitor data and generates a full content strategy: what to make, what to stop, 5 specific reel ideas with hooks
+- **Content Ideas** — GPT-4o reads your data + competitor data and generates a full content strategy: what to make, what to stop, 5 specific reel ideas with hooks
 - **Transcription** — Per-reel transcription via OpenAI Whisper (click per reel, not bulk)
 - **Local cache** — All scraped data is saved to `data/*.json` so you never re-scrape on refresh
 
@@ -19,8 +19,7 @@
 
 - [Next.js 14](https://nextjs.org/) — App Router, API routes
 - [Apify](https://apify.com/) — Instagram scraper (`shu8hvrXbJbY3Eb9W` actor)
-- [Google Gemini](https://aistudio.google.com/) — Gemini 1.5 Pro for content ideas
-- [OpenAI](https://platform.openai.com/) — Whisper for transcription
+- [OpenAI](https://platform.openai.com/) — Whisper for transcription, GPT-4o for content ideas
 - [Recharts](https://recharts.org/) — Bar chart, radar chart
 - [Tailwind CSS](https://tailwindcss.com/) — Styling
 
@@ -53,8 +52,7 @@ Open `.env.local` and add:
 
 ```env
 APIFY_TOKEN=your_apify_token_here
-GEMINI_API_KEY=your_gemini_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=sk-proj-...
 ```
 
 **Getting your keys:**
@@ -137,8 +135,7 @@ data/                             # Auto-created, gitignored
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `APIFY_TOKEN` | Yes | Apify API token for Instagram scraping |
-| `GEMINI_API_KEY` | Yes | Google Gemini key for content ideas |
-| `OPENAI_API_KEY` | Yes | OpenAI key for Whisper transcription |
+| `OPENAI_API_KEY` | Yes | OpenAI key for Whisper + GPT-4o |
 
 ---
 
@@ -149,7 +146,7 @@ data/                             # Auto-created, gitignored
 | Scrape 30 reels (your account) | ~$0.05 |
 | Scrape 15 reels (one competitor) | ~$0.03 |
 | Transcribe one reel (60s) | ~$0.006 |
-| Generate content ideas | ~$0.00 (Gemini Free Tier) |
+| Generate content ideas | ~$0.01 per run |
 
 All data is cached locally so you only pay when you explicitly re-sync.
 

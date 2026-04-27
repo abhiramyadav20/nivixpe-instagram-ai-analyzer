@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'NIVIXPE — AI Content Dashboard',
-  description: 'Instagram analytics, competitor research & AI-powered content strategy. Scrape reels, analyze performance, and generate content ideas with Gemini 1.5 Pro.',
+  description: 'Instagram analytics, competitor research & AI-powered content strategy. Scrape reels, analyze performance, and generate content ideas with GPT-4o.',
   keywords: ['Instagram analytics', 'content strategy', 'AI content ideas', 'reel analytics', 'competitor analysis'],
   authors: [{ name: 'Nivixpe' }],
   openGraph: {

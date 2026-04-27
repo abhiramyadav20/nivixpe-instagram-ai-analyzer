@@ -61,9 +61,13 @@ export default function ComparisonView({ myReels, competitors, myUsername = 'niv
   const isAll = contentType === 'all'
   const primaryMetric = isPost ? 'likes' : 'views'
   const allAccounts = [
-    { username: myUsername, reels: myReels, isMe: true },
-    ...Object.entries(competitors).map(([username, reels]) => ({ username, reels, isMe: false })),
-  ].filter((a) => a.reels.length > 0)
+    { username: myUsername, reels: Array.isArray(myReels) ? myReels : [], isMe: true },
+    ...Object.entries(competitors || {}).map(([username, reels]) => ({ 
+      username, 
+      reels: Array.isArray(reels) ? reels : [], 
+      isMe: false 
+    })),
+  ].filter((a) => a.reels && a.reels.length > 0)
 
   if (allAccounts.length < 2) {
     return (
@@ -81,11 +85,11 @@ export default function ComparisonView({ myReels, competitors, myUsername = 'niv
 
   // ─── Metrics ────────────────────────────────────────────────────────────────
   const metrics = allAccounts.map((a, i) => {
-    const avg = a.reels.reduce((s, r) => s + r[primaryMetric], 0) / a.reels.length
+    const avg = a.reels.reduce((s, r) => s + (Number(r[primaryMetric]) || 0), 0) / a.reels.length
     const avgEng = isVideo
-      ? a.reels.reduce((s, r) => s + (r.views > 0 ? (r.likes + r.comments) / r.views : 0), 0) / a.reels.length * 100
-      : a.reels.reduce((s, r) => s + (r.likes + r.comments), 0) / a.reels.length
-    const topContent = a.reels.reduce((best, r) => r[primaryMetric] > best[primaryMetric] ? r : best, a.reels[0])
+      ? a.reels.reduce((s, r) => s + (r.views > 0 ? (Number(r.likes) + Number(r.comments)) / r.views : 0), 0) / a.reels.length * 100
+      : a.reels.reduce((s, r) => s + (Number(r.likes) + Number(r.comments)), 0) / a.reels.length
+    const topContent = a.reels.reduce((best, r) => (Number(r[primaryMetric]) || 0) > (Number(best[primaryMetric]) || 0) ? r : best, a.reels[0])
     return { ...a, avgMetric: avg, avgEng, topContent, color: ACCOUNT_COLORS[i], bg: ACCOUNT_BG[i] }
   })
 

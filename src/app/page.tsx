@@ -11,9 +11,10 @@ import ComparisonView from '@/components/ComparisonView'
 import {
   RefreshCw, LayoutDashboard, Users2, Lightbulb, AlertCircle,
   Loader2, Sparkles, Filter, Plus, X, Clock, GitCompare, ChevronRight,
-  BarChart3, TrendingUp, Search, KeyRound,
+  BarChart3, TrendingUp, Search, KeyRound, Zap
 } from 'lucide-react'
 import clsx from 'clsx'
+import { puter } from '@heyputer/puter.js'
 
 type Tab = 'mine' | 'competitors' | 'compare' | 'ideas'
 type ScrapeState = 'idle' | 'starting' | 'polling' | 'fetching' | 'done' | 'error'
@@ -156,7 +157,6 @@ export default function Dashboard() {
   const [ideas, setIdeas] = useState('')
   const [ideasLoading, setIdeasLoading] = useState(false)
   const [ideasError, setIdeasError] = useState('')
-  const [apiKey, setApiKey] = useState('')
 
   // Auto Refresh
   const [autoRefreshed, setAutoRefreshed] = useState(false)
@@ -187,8 +187,6 @@ export default function Dashboard() {
         setCompetitors(reels)
         setCompLastSynced(synced)
       }
-      const savedKey = localStorage.getItem('gemini_api_key')
-      if (savedKey) setApiKey(savedKey)
       setCacheLoading(false)
     })
   }, [])
@@ -283,30 +281,84 @@ export default function Dashboard() {
   const filteredReels = perfFilter === 'all' ? myFilteredTypeReels : myFilteredTypeReels.filter((r) => r.performance === perfFilter)
 
   const competitorsFilteredType: Record<string, Reel[]> = {}
-  for (const [u, r] of Object.entries(competitors)) {
-    competitorsFilteredType[u] = r.filter(reel => contentType === 'all' ? true : contentType === 'video' ? reel.type === 'Video' : reel.type !== 'Video')
-  }
+  Object.entries(competitors || {}).forEach(([u, r]) => {
+    if (Array.isArray(r)) {
+      competitorsFilteredType[u] = r.filter(reel => 
+        contentType === 'all' ? true : contentType === 'video' ? reel.type === 'Video' : reel.type !== 'Video'
+      )
+    }
+  })
   const competitorUsernames = Object.keys(competitorsFilteredType)
 
-  // ─── Generate ideas ───────────────────────────────────────────────────────
+  // ─── Generate ideas (Puter.js Integration) ───────────────────────────────
   const generateIdeas = useCallback(async () => {
     setIdeasLoading(true)
     setIdeasError('')
     try {
-      const res = await fetch('/api/content-ideas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ myReels: myFilteredTypeReels, competitorReels: competitorsFilteredType, apiKey, contentType }),
-      })
-      const data = await res.json()
-      if (data.error) throw new Error(data.error)
-      setIdeas(data.ideas as string)
-    } catch (e: unknown) {
-      setIdeasError(e instanceof Error ? e.message : String(e))
+      const label = contentType === 'video' ? 'Reels' : contentType === 'post' ? 'Posts' : 'Content'
+      
+      const formatMetric = (r: Reel) => {
+        if (contentType === 'video') return r.views ? `${r.views.toLocaleString()} views` : `${r.likes.toLocaleString()} likes`
+        return `${r.likes.toLocaleString()} likes`
+      }
+
+      // 1. Build competitor context
+      const competitorContext = Object.entries(competitorsFilteredType)
+        .map(([username, reels]) => {
+          if (!reels?.length) return null
+          const sorted = [...reels].sort((a, b) => contentType === 'post' ? b.likes - a.likes : b.views - a.views || b.likes - a.likes)
+          const top5 = sorted.slice(0, 5).map((r, i) => {
+            const metric = formatMetric(r)
+            const type = r.type === 'Video' ? 'Reel' : 'Post'
+            return `  ${i + 1}. [${type}] ${metric} | Caption: "${r.caption.slice(0, 200).replace(/\n/g, ' ')}"`
+          }).join('\n')
+          return `@${username} top performers:\n${top5}`
+        })
+        .filter(Boolean)
+        .join('\n\n')
+
+      // 2. Build my context
+      const myTop = [...myFilteredTypeReels]
+        .sort((a, b) => contentType === 'post' ? b.likes - a.likes : b.views - a.views || b.likes - a.likes)
+        .slice(0, 5)
+        .map((r, i) => `  ${i + 1}. ${formatMetric(r)} | "${r.caption.slice(0, 150).replace(/\n/g, ' ')}"`).join('\n')
+
+      const prompt = `You are an elite Instagram growth strategist for @nivixpe (fintech startup).
+      
+      GOAL: Analyze our content vs competitors and tell us EXACTLY what we are missing.
+      
+      ## MY PERFORMANCE DATA (@nivixpe)
+      ${myTop || '(No data available for my account yet)'}
+      
+      ## COMPETITOR PERFORMANCE DATA
+      ${competitorContext || '(No competitor data available - provide generic high-growth fintech patterns)'}
+      
+      ## YOUR TASK (COMPARATIVE ANALYSIS)
+      
+      ### 1. 🔍 THE COMPARISON
+      Compare the hooks and themes of @nivixpe's top content vs the competitor's top performers. What is the biggest difference in their approach?
+      
+      ### 2. 🎯 WHAT IS MISSING?
+      List 3 specific content types, visual styles, or topics that are generating high engagement for competitors but are COMPLETELY MISSING from @nivixpe's profile.
+      
+      ### 3. 💡 COMPARED IDEAS
+      Suggest 5 specific ${label} ideas that bridge the gap. For each idea, explain which competitor it was inspired by and why it will work for @nivixpe.
+      Include: Hook, Visual Structure, and the specific "Viral Trigger" from the competitor.
+      
+      ### 4. 🏆 THE "WIN" INSIGHT
+      One single change to make to our content today that will close the gap with the top competitors.
+      
+      Be data-driven and reference competitor handles (@username) often. Be brutal about what we are missing.`
+
+      // Use Puter.js for free unlimited OpenAI (GPT-4o)
+      const response = await puter.ai.chat(prompt, { model: 'gpt-4o' })
+      setIdeas(String(response))
+    } catch (e: any) {
+      setIdeasError(e.message || 'Puter.js failed to generate ideas')
     } finally {
       setIdeasLoading(false)
     }
-  }, [myFilteredTypeReels, competitorsFilteredType, apiKey, contentType])
+  }, [myFilteredTypeReels, competitorsFilteredType, contentType])
 
   // ─── Tab navigation ───────────────────────────────────────────────────────
   const handleTabChange = (newTab: Tab) => {
@@ -682,29 +734,6 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* API Key input */}
-            <div className="mb-6 rounded-xl border border-slate-700/40 bg-slate-800/30 p-4 flex flex-col sm:flex-row sm:items-center gap-4 animate-fade-in-up">
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-slate-400 block mb-1.5 uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5">
-                     <KeyRound className="w-3 h-3" /> Gemini API Key
-                  </span>
-                </label>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => {
-                    setApiKey(e.target.value)
-                    localStorage.setItem('gemini_api_key', e.target.value)
-                  }}
-                  placeholder="AIza..."
-                  className="w-full bg-slate-900/60 border border-slate-700/50 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/10 placeholder:text-slate-600 transition-all"
-                />
-              </div>
-              <div className="flex-1 text-xs text-slate-500 leading-relaxed">
-                Enter your Gemini API key to unlock AI-powered content strategy. Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">aistudio.google.com</a>. Without a key, the dashboard uses a smart local heuristic engine.
-              </div>
-            </div>
 
             {/* Warnings */}
             {(myReels.length === 0 || competitorUsernames.length === 0) && (
@@ -727,7 +756,7 @@ export default function Dashboard() {
             {ideasLoading && (
               <ScrapeProgress 
                 message={`Analyzing your ${contentType === 'all' ? 'content' : contentType === 'video' ? 'Reels' : 'Posts'} + competitors…`} 
-                subtext={`Gemini 1.5 Pro is reviewing your ${contentType === 'all' ? 'data' : contentType === 'video' ? 'video performance' : 'image/carousel metrics'} and generating a strategy`} 
+                subtext={`Unlimited GPT-4o via Puter.js is reviewing your ${contentType === 'all' ? 'data' : contentType === 'video' ? 'video performance' : 'image/carousel metrics'} and generating a strategy`} 
               />
             )}
 
@@ -794,7 +823,7 @@ export default function Dashboard() {
                 </div>
                 <h3 className="text-white font-bold text-lg mb-2">No {contentType === 'all' ? 'ideas' : contentType === 'video' ? 'Reel ideas' : 'Post ideas'} yet</h3>
                 <p className="text-slate-500 text-sm mb-8 max-w-sm mx-auto leading-relaxed">
-                  Click &quot;Generate Ideas&quot; — Gemini 1.5 Pro will analyze your {contentType === 'all' ? 'performance' : contentType === 'video' ? 'top Reels' : 'top Posts'} vs competitors and tell you exactly what to make next.
+                  Click &quot;Generate Ideas&quot; — GPT-4o will analyze your {contentType === 'all' ? 'performance' : contentType === 'video' ? 'top Reels' : 'top Posts'} vs competitors and tell you exactly what to make next.
                 </p>
                 <button
                   onClick={generateIdeas}
